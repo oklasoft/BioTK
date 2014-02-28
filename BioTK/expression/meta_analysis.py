@@ -188,13 +188,12 @@ class ExpressionDB(object):
             platform._add_samples(geo_platform, it)
       
 def test():
-    db = ExpressionDB("/home/gilesc/expression2.h5")
+    db = ExpressionDB("/home/gilesc/expression.h5")
     # 341
-    #for accession in [1355, 5424, 5426, 85]:
-    #for accession in [1355]:
-    #    accession = "GPL%s" % accession
-    #    print("* Inserting %s" % accession)
-    #    db.add_family(accession)
+    for accession in [1355, 5424, 5426, 85]:
+        accession = "GPL%s" % accession
+        print("* Inserting %s" % accession)
+        db.add_family(accession)
 
     platform = db[10116]["GPL1355"]
     P = platform.attributes()
