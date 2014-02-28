@@ -1,0 +1,12 @@
+*.swp
+*.swo
+*.c
+*.cpp
+*.o
+*.so
+
+*.egg
+*.egg-info
+
+build
+__pycache__

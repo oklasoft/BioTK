@@ -1,0 +1,4 @@
+python3-memcached
+pandas
+tables
+statsmodels
