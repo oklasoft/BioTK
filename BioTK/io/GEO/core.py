@@ -153,6 +153,9 @@ class Family(object):
             elif line.startswith("!sample_table_begin"):
                 expression = read_table(handle, "!sample_table_end")
                 expression = expression.set_index("ID_REF")["VALUE"]
+                if expression.dtype != float:
+                    expression = pd.Series(list(map(as_float, expression)), 
+                        index=expression.index)
 
                 for k,v in attrs.items():
                     attrs[k] = v.strip()

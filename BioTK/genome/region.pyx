@@ -20,13 +20,26 @@ cdef Strand parse_strand(str strand):
     else:
         return STRAND_UNKNOWN
 
+cdef str strand_to_string(Strand strand):
+    if strand == STRAND_FWD:
+        return "+"
+    elif strand == STRAND_REV:
+        return "-"
+    else:
+        return "."
+
 cdef class Region:
-    cdef: 
+    cdef readonly: 
         str contig
         long start, end
         str name
         double score
+    cdef:
         Strand strand
+
+    property strand:
+        def __get__(self):
+            return strand_to_string(self.strand)
 
     def __init__(self, 
             str contig, long start, long end, 
@@ -44,3 +57,7 @@ cdef class Region:
 
     def __len__(self):
         return self.length()
+
+    def __repr__(self):
+        return "<Region %s:%s-%s (%s)>" % (self.contig, self.start, self.end, 
+                strand_to_string(self.strand))

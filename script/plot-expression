@@ -1,0 +1,39 @@
+#!/usr/bin/env python
+
+import argparse
+import sys
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+from BioTK.expression.meta_analysis import ExpressionDB
+
+def main(args):
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--db-path", "-d",required=True)
+    parser.add_argument("--entrez-gene-id", "-g", 
+            required=True, type=int)
+    parser.add_argument("--output-file", "-o")
+    # also taxon ID (maybe), platform ID (optional), and/or
+    # variable to be correlated, other gene accession types
+    args = parser.parse_args(args)
+    out = args.output_file or ("%s.png" % args.entrez_gene_id)
+
+    db = ExpressionDB(args.db_path)
+    platform = db[10116]["GPL1355"]
+    P = platform.attributes()
+    age = P["Age"].dropna()
+    X = platform.expression(age.index,
+            collapse="ENTREZ_GENE_ID", normalize=True)
+    x = X.ix[str(args.entrez_gene_id),:]
+
+    print("Correlation:", x.corr(age))
+
+    plt.scatter(age, np.log10(x))
+    plt.xlabel("Age (months)")
+    plt.ylabel("Expression level")
+    plt.title("GeneID: %s" % args.entrez_gene_id) 
+    plt.savefig(out)
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

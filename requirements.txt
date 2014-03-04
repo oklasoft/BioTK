@@ -2,3 +2,4 @@ python3-memcached
 pandas
 tables
 statsmodels
+h5py
