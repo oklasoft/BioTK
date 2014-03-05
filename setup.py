@@ -80,7 +80,9 @@ setup(
     scripts=scripts,
     ext_modules=[
         Extension("BioTK.genome.region", 
-            ["BioTK/genome/region.pyx"])
+            ["BioTK/genome/region.pyx"]),
+        Extension("BioTK.text.types",
+            ["BioTK/text/types.pyx"])
     ],
     #entry_points={
     #    "console_scripts":
