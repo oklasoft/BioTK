@@ -17,3 +17,23 @@ def chunks(it, size=1000):
                 chunk = []
         if chunk:
             yield chunk
+
+class ClosingMixin(object):
+    """
+    Inherit from this mixin class to make a file-like
+    object close upon exiting a 'with statement' block.
+
+    Basically does the same thing as :py:func:`contextlib.closing`.
+    """
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        try:
+            self.close()
+        except:
+            pass
+    
+    def close(self):
+        raise NotImplementedError
