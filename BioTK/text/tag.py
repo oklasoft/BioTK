@@ -1,5 +1,5 @@
 """
-POS tagging algorithms.
+Part-of-speech (POS) tagging algorithms.
 """
 
 import numpy as np
@@ -14,6 +14,9 @@ class ITagger(object):
         pass
 
 class HMMTagger(ITagger):
+    """
+    A POS Tagger based on the classic Hidden Markov Model approach.
+    """
     def __init__(self, words, tags, model):
         self._words = words
         self._tags = tags

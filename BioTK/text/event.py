@@ -1,0 +1,3 @@
+"""
+Event and relation extraction.
+"""

@@ -34,7 +34,7 @@ def fetch(name):
         raise Exception("Unknown treebank.")
     url = "http://bllip.cs.brown.edu/download/genia1.0-division-rel1.tar.gz"
     with tarfile.open(download(url), "r:gz") as tgz:
-        # Also: test train
+        # Also: test.trees train.trees
         with tgz.extractfile("genia-dist/division/dev.trees") as h:
             with io.TextIOWrapper(h, encoding="utf8") as h:
                 return parse(h)
