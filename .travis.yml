@@ -2,9 +2,9 @@ language: python
 python:
     - "3.3"
 install: 
-    - sudo add-apt-repository ppa:pythonxy/pythonxy-devel
+    - sudo add-apt-repository -y ppa:pythonxy/pythonxy-devel
     - sudo apt-get update
-    - sudo apt-get install python3-numpy python3-scipy libhdf5-serial-dev pandas bottleneck patsy statsmodels
+    - sudo apt-get install -y python3-numpy python3-scipy libhdf5-serial-dev pandas bottleneck patsy statsmodels
     - pip install -r requirements.txt
     - python setup.py install
 script: 

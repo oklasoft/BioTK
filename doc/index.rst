@@ -4,20 +4,37 @@ Welcome to BioTK's documentation!
 Overview
 --------
 
-This package contains code and scripts for various bioinformatics tasks:
+BioTK is a Python toolkit, containing a library and scripts, for various
+bioinformatics tasks:
 
-The principal developers are `Cory Giles <mailto:mail@corygil.es>`_
-and `Mikhail Dozmorov <mailto:dozmorovm@omrf.org>`_, and the package
-is licensed under the `GNU Affero General Public License version 3
-<http://www.gnu.org/licenses/agpl-3.0.html>`_ (or any later version
-thereof, at your option).
+- Differential expression analysis on microarray and RNA-seq data
+- Functional and downstream analysis of DE gene lists
+- Ontology handling 
+- Text mining, ranging from shallow NLP to relation extraction
+- Efficient storage and querying of sets of genomic intervals 
+  (similar to BEDTools, GenomicRanges, etc.)
 
-General Information
--------------------
+Tutorial
+--------
 
 .. toctree::
    :maxdepth: 3
-   
+
+    expression
+
+Contributors
+------------
+
+- `Cory Giles <mailto:mail@corygil.es>`_
+- `Mikhail Dozmorov <mailto:dozmorovm@omrf.org>`_
+
+License
+-------
+
+The is licensed under the `GNU Affero General Public License version 3
+<http://www.gnu.org/licenses/agpl-3.0.html>`_ (or any later version
+thereof, at your option).
+ 
 Indices and tables
 ==================
 
