@@ -1,3 +1,4 @@
+cython
 python3-memcached
 pandas
 tables
