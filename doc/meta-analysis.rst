@@ -1,8 +1,8 @@
+.. _meta_analysis:
+
 ===================================
 Transcript expression meta-analysis
 ===================================
-
-.. meta_analysis:
 
 BioTK provides a way to store up to millions of expression vectors, along with
 associated probe mappings and phenotype/sample data, in HDF5 format on your

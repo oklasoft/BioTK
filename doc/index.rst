@@ -14,13 +14,14 @@ bioinformatics tasks:
 - Efficient storage and querying of sets of genomic intervals 
   (similar to BEDTools, GenomicRanges, etc.)
 
-Tutorial
---------
+Topics
+------
 
 .. toctree::
    :maxdepth: 3
 
-    expression
+   expression
+   meta-analysis
 
 Contributors
 ------------
