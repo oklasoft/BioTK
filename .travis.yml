@@ -2,7 +2,7 @@ language: python
 python:
     - "3.3"
 install: 
-    - sudo apt-get install python3-numpy python3-scipy libhdf5 libhdf5-dev
+    - sudo apt-get install python3-numpy python3-scipy libhdf5-serial-dev
     - pip install -r requirements.txt
     - python setup.py install
 script: 
