@@ -1,7 +1,5 @@
-numpy >= 1.4.1
 cython
 python3-memcached
 pandas
-tables
 statsmodels
 h5py
