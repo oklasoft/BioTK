@@ -1,5 +1,10 @@
 cython
-python3-memcached
-pandas
+
 statsmodels
+pandas
+numexpr
+bottleneck
+
 h5py
+
+python3-memcached
