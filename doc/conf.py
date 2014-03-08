@@ -50,7 +50,7 @@ master_doc = 'index'
 # General information about the project.
 project = 'BioTK'
 year = datetime.datetime.now().year
-author = "Cory Giles"
+author = "BioTK contributors"
 copyright = str(year) + ', ' + author
 
 # The short X.Y version, fills |version|

@@ -8,3 +8,5 @@ bottleneck
 h5py
 
 python3-memcached
+
+pyparsing

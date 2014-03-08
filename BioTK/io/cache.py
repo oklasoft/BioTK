@@ -1,10 +1,17 @@
-import pickle
-import hashlib
+"""
+Cache downloads or computation results in RAM or on the filesystem.
+"""
+
 import base64
+import hashlib
+import logging
 import os
+import pickle
 import urllib.request
 
 import memcache
+
+log = logging.getLogger(__name__)
 
 MEMCACHED_SLAB_SIZE = 1024 * 512
 
@@ -35,8 +42,6 @@ def memcached(host="127.0.0.1", port=11211):
         return wrapped
     return decorator
 
-# TODO: Implement pure-Python memory cache and fork if one doesn't exist
-
 RAMCache = memcached
 
 # TODO: actually use cache_size (in MB) and make this FIFO 
@@ -48,6 +53,7 @@ def download(url, cache_dir="/tmp/BioTK/downloads/", cache_size=100):
             base64.b64encode(url.encode("utf-8")))
     
     if not os.path.exists(dest):
+        log.info("Cache miss for URL: %s" % url)
         urllib.request.urlretrieve(url, dest)
 
     return dest

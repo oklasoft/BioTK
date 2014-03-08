@@ -1,9 +1,16 @@
-from BioTK.io.cache import memcached
-from BioTK.text.types import Tree
+"""
+Read syntactic trees from a treebank file (in PTB format).
+"""
+import io
+import tarfile
 
 from pyparsing import Word, Forward, Group, Suppress, OneOrMore
 
-__all__ = ["parse", "sample"]
+from BioTK.io.cache import memcached, download
+from BioTK.io import generic_open
+from BioTK.text.types import Tree
+
+__all__ = ["parse", "fetch"]
 
 ch = "".join(set(map(chr, range(33, 127))) - set("()"))
 LPAR, RPAR = map(Suppress, "()")
@@ -15,16 +22,19 @@ node <<= Group(LPAR + tag + OneOrMore(node | token) + RPAR)\
 treebank = OneOrMore(node)
 
 @memcached()
-def _parse(path):
-    return list(treebank.parseFile(path))
+def _parse(handle):
+    return list(treebank.parseString(handle.read()))
 
-def parse(path):
-    return [Tree.from_list(tree) for tree in _parse(path)]
+def parse(handle_or_path):
+    with generic_open(handle_or_path) as handle:
+        return [Tree.from_list(tree) for tree in _parse(handle)]
 
-TREEBANK = """
-(S1 (S (NP (NP (NN Generation)) (PP (IN of) (NP (NP (JJ CD1+RelB+) (JJ dendritic) (NNS cells)) (CC and) (NP (ADJP (JJ tartrate-resistant) (NN acid) (JJ phosphatase-positive)) (JJ osteoclast-like) (JJ multinucleated) (JJ giant) (NNS cells)))) (PP (IN from) (NP (JJ human) (NNS monocytes))) (. .))))
-(S1 (S (S (NP (PRP We)) (ADVP (RB previously)) (VP (VBD showed) (SBAR (IN that) (S (NP (NP (NP (JJ granulocyte-macrophage) (JJ colony-stimulating) (NN factor)) (PRN (-LRB- -LRB-) (NP (NN GM-CSF)) (-RRB- -RRB-))) (CC and) (NP (NP (NN macrophage) (JJ colony-stimulating) (NN factor)) (PRN (-LRB- -LRB-) (NP (NN M-CSF)) (-RRB- -RRB-)))) (VP (VBP stimulate) (NP (NP (DT the) (NN differentiation)) (PP (IN of) (NP (JJ human) (NNS monocytes))) (PP (IN into) (NP (NP (CD two) (ADJP (RB phenotypically) (JJ distinct)) (NNS types)) (PP (IN of) (NP (NNS macrophages)))))))))) (. .))))
-"""
-
-def sample():
-    return [Tree.from_list(t) for t in treebank.parseString(TREEBANK)]
+def fetch(name):
+    if not name == "GENIA":
+        raise Exception("Unknown treebank.")
+    url = "http://bllip.cs.brown.edu/download/genia1.0-division-rel1.tar.gz"
+    with tarfile.open(download(url), "r:gz") as tgz:
+        # Also: test train
+        with tgz.extractfile("genia-dist/division/dev.trees") as h:
+            with io.TextIOWrapper(h, encoding="utf8") as h:
+                return parse(h)
