@@ -10,13 +10,19 @@ def _index_positions(items):
     return dict(list(map(reversed, enumerate(items))))
 
 class ITagger(object):
+    @staticmethod
     def train(tokens):
-        pass
+        raise NotImplementedError
 
 class HMMTagger(ITagger):
     """
     A POS Tagger based on the classic Hidden Markov Model approach.
     """
+
+    # TODO: The emission probability for tags on unknown words is
+    #   uniform, should be the same probability as the average for
+    #   known words
+
     def __init__(self, words, tags, model):
         self._words = words
         self._tags = tags
@@ -34,7 +40,7 @@ class HMMTagger(ITagger):
 
         transition = np.zeros((len(tags), len(tags)))
         start = np.zeros((len(tags),))
-        emission = np.zeros((len(tags), len(words)))
+        emission = np.zeros((len(tags), len(words)+1))
         for s in corpus:
             for i,t in enumerate(s):
                 tag_ix = tag_index[t.tag]
@@ -57,6 +63,6 @@ class HMMTagger(ITagger):
         return HMMTagger(words, tags, model)
     
     def predict(self, words):
-        x = [self._word_index[w] for w in words]
+        x = [self._word_index.get(w, len(self._words)) for w in words]
         logprob, tag_codes = self._model.decode(x)
         return [self._tags[code] for code in tag_codes]
