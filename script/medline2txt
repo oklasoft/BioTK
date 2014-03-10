@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+"""
+Convert one or more MEDLINE XML files to tab-delimited text on stdout.
+"""
+
+import argparse
+
+from BioTK.io import MEDLINE
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("medline_xml_file", nargs="+")
+    args = parser.parse_args()
+
+    for path in args.medline_xml_file:
+        with MEDLINE.parse(path) as articles:
+            for article in articles:
+                if not article.title:
+                    continue
+                text = article.title
+                if article.abstract:
+                    text = " ".join([text, article.abstract])
+                print(article.id, text, sep="\t")

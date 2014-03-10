@@ -38,7 +38,7 @@ class MedlineXMLFile(ClosingMixin):
     _non_digit_regex = re.compile(r"[^\d]+")
 
     def __init__(self, path):
-        self._handle = open(path, "rb")
+        self._handle = generic_open(path, "rb")
     
     def close(self):
         self._handle.close()
