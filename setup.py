@@ -82,7 +82,9 @@ setup(
         Extension("BioTK.genome.region", 
             ["BioTK/genome/region.pyx"]),
         Extension("BioTK.text.types",
-            ["BioTK/text/types.pyx"])
+            ["BioTK/text/types.pyx"]),
+        Extension("BioTK.text.AhoCorasick",
+            ["BioTK/text/AhoCorasick.pyx"])
     ],
     #entry_points={
     #    "console_scripts":
