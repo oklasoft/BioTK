@@ -48,7 +48,32 @@ class RelEx(object):
     def extract(self, dgraph):
         pass
 
+from BioTK.io.cache import memcached
+from BioTK.io import Wren 
+from BioTK.text import AhoCorasick
+
+def get_terms():
+    path = "/home/gilesc/Data/SORD_Master_v31.mdb"
+    db = Wren.SORD(path)
+    return db.terms
+
 if __name__ == "__main__":
+    trie = AhoCorasick.Trie()
+
+    terms = get_terms()
+    for t in terms.values():
+        for s in t.synonyms:
+            trie.add(s.text, key=t.id)
+    trie.build()
+    print("Trie built...")
+
     with fileinput.input() as handle:
-        for g in DependencyGraph.load(handle):
-            print(repr(g))
+        n = 0
+        for i,line in enumerate(handle):
+            if i % 1000 == 0:
+                print(i, n)
+            for m in trie.search(line):
+                n += 1
+
+    #    for g in DependencyGraph.load(handle):
+    #        print(repr(g))
