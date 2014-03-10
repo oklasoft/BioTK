@@ -51,7 +51,48 @@ scripts = [os.path.abspath("script/" + p) \
 requirements = [str(item.req) for item in 
         parse_requirements("requirements.txt")]
 
+###################
+# Extension modules
+###################
 
+extensions = [
+    Extension("BioTK.genome.region", 
+        ["BioTK/genome/region.pyx"]),
+    Extension("BioTK.text.types",
+        ["BioTK/text/types.pyx"]),
+    Extension("BioTK.text.AhoCorasick",
+        ["BioTK/text/AhoCorasick.pyx"])
+]
+
+class LibraryNotFound(Exception):
+    pass
+
+def pkgconfig(*packages, **kw):
+    flag_map = {'-I': 'include_dirs', 
+                '-L': 'library_dirs', 
+                '-l': 'libraries'}
+    try:
+        args = ["pkg-config", "--libs", "--cflags"]
+        args.extend(packages)
+        out = subprocess.check_output(args).decode(sys.getdefaultencoding())
+    except subprocess.CalledProcessError:
+        raise LibraryNotFound()
+
+    kw = {}
+    for token in out.split():
+        kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
+    return kw
+
+# Optional extensions
+
+try:
+    libmdb = pkgconfig("libmdb")
+    extensions.append(Extension("BioTK.io.MDB", 
+        ["BioTK/io/MDB.pyx"], **libmdb))
+except LibraryNotFound:
+    print("WARNING: libmdb not found. Continuing without BioTK.io.MDB...",
+        file=sys.stderr)
+ 
 #####################
 # Package description
 #####################
@@ -73,19 +114,15 @@ setup(
     license="AGPLv3+",
 
     # Modules, data, extensions, and scripts to be installed
-    packages=["BioTK", "BioTK.io", "BioTK.expression", "BioTK.io.GEO"],
+    packages=["BioTK"],
     install_requires=requirements,
     tests_require=requirements + ["pytest"],
-    extras_require={"doc": requirements},
+    extras_require={
+        "doc": requirements,
+        "mdb": ["mdbread"],
+    },
     scripts=scripts,
-    ext_modules=[
-        Extension("BioTK.genome.region", 
-            ["BioTK/genome/region.pyx"]),
-        Extension("BioTK.text.types",
-            ["BioTK/text/types.pyx"]),
-        Extension("BioTK.text.AhoCorasick",
-            ["BioTK/text/AhoCorasick.pyx"])
-    ],
+    ext_modules=extensions,
     #entry_points={
     #    "console_scripts":
     #    ["expression-db-add-family = \
