@@ -10,6 +10,7 @@ assert(mode in ("dev", "release"))
 
 todo_include_todos = mode == "dev"
 autodoc_docstring_signature = True
+html_domain_indices = True
 
 # Force sphinx to document class __init__ methods
 

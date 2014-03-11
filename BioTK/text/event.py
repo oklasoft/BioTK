@@ -53,27 +53,36 @@ from BioTK.io import Wren
 from BioTK.text import AhoCorasick
 
 def get_terms():
-    path = "/home/gilesc/Data/SORD_Master_v31.mdb"
+    path = "/home/gilesc/Data/SORD29.mdb"
     db = Wren.SORD(path)
     return db.terms
 
 if __name__ == "__main__":
-    trie = AhoCorasick.Trie()
+    trie = AhoCorasick.MixedCaseSensitivityTrie()
 
     terms = get_terms()
     for t in terms.values():
         for s in t.synonyms:
-            trie.add(s.text, key=t.id)
+            trie.add(s.text, case_sensitive=s.case_sensitive, key=t.id)
     trie.build()
     print("Trie built...")
+
+    import collections
+    c = collections.Counter()
 
     with fileinput.input() as handle:
         n = 0
         for i,line in enumerate(handle):
-            if i % 1000 == 0:
-                print(i, n)
+            if n % 1000 == 0:
+                print(n)
+            if n >= 100000:
+                break
             for m in trie.search(line):
                 n += 1
+                c[m.key] += 1
+    
+    for id, count in c.most_common(5):
+        print(id, count, terms[id])
 
     #    for g in DependencyGraph.load(handle):
     #        print(repr(g))

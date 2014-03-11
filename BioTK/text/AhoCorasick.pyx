@@ -4,6 +4,22 @@ from cpython cimport bool
 # TODO: possibly use a STL map and pointers 
 #   to get better performance for searches?
 
+__all__ = ["Trie", "MixedCaseSensitivityTrie"]
+
+def longest_nonoverlapping_matches(matches):
+    out = []
+    cdef Match m1, m2
+    cdef bool ok
+    matches.sort(key=len).reverse()
+    for m1 in matches:
+        ok = True
+        for m2 in out:
+            if m1.overlaps(m2):
+                ok = False
+        if ok:
+            out.append(m1)
+    return out
+
 cdef class Match:
     cdef readonly:
         int start, end
@@ -13,6 +29,12 @@ cdef class Match:
         self.start = start
         self.end = end
         self.key = key
+
+    def __len__(self):
+        return self.end - self.start
+
+    cdef bool overlaps(self, Match o):
+        return self.end >= o.start and self.start <= o.end
 
 cdef class Node:
     cdef public:
@@ -48,12 +70,26 @@ def _add_fail_transitions(node):
 cdef class Trie:
     cdef:
         Node root
-        bool built, case_sensitive, allow_overlapping
+        bool built, case_sensitive, allow_overlaps, break_on_word_boundaries
 
-    def __init__(self, case_sensitive=True, allow_overlapping=True):
+    def __init__(self, 
+            case_sensitive=True, 
+            break_on_word_boundaries=False, 
+            allow_overlaps=True):
+        """
+        Create a keyword Trie.
+
+        Args: 
+        - case_sensitive (bool)
+        - allow_overlaps : whether to allow overlapping matches or not.
+            If not, the longest nonoverlapping matches are returned
+        - boundary_characters : matches are required to be bounded 
+            on both sides by either whitespacstring beginning or end.
+        """
         self.root = Node()
         self.built = False
         self.case_sensitive = case_sensitive
+        self.allow_overlaps = allow_overlaps
 
     def add(self, str text, key=None):
         if self.built:
@@ -93,12 +129,17 @@ cdef class Trie:
                 while n.terminal:
                     matches.append(Match(1 + i - n.depth, i + 1, node.key))
                     n = n.fail
+        if not self.allow_overlaps:
+            matches = longest_nonoverlapping_matches(matches)
         return matches
 
 class MixedCaseSensitivityTrie(object):
     def __init__(self, allow_overlaps=True):
-        self._cs = Trie(case_sensitive=True)
-        self._ci = Trie(case_sensitive=False)
+        self._cs = Trie(case_sensitive=True, 
+                allow_overlaps=True)
+        self._ci = Trie(case_sensitive=False, 
+                allow_overlaps=True)
+        self.allow_overlaps = allow_overlaps
 
     def build(self):
         self._cs.build()
@@ -109,4 +150,7 @@ class MixedCaseSensitivityTrie(object):
         trie.add(text, key=key)
 
     def search(self, str text):
-        return self._cs.search(text) + self._ci.search(text)
+        matches = self._cs.search(text) + self._ci.search(text)
+        if not self.allow_overlaps:
+            matches = longest_nonoverlapping_matches(matches)
+        return matches

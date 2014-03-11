@@ -16,7 +16,12 @@ sys.argv = sys.argv[:2]
 cmdclass = {}
 
 try:
-    from sphinx.setup_command import BuildDoc
+    import sphinx.setup_command
+    class BuildDoc(sphinx.setup_command.BuildDoc):
+        def __init__(self, *args, **kwargs):
+            # TODO: Do programmatically
+            subprocess.call(["sphinx-apidoc", "-o", "doc/api", "."])
+            super(BuildDoc, self).__init__(*args, **kwargs)
     cmdclass["doc"] = BuildDoc
 except ImportError:
     pass
@@ -41,7 +46,6 @@ class Test(TestCommand):
         raise SystemExit(errno)
 
 cmdclass["test"] = Test
-
 
 # Find scripts and requirements
 

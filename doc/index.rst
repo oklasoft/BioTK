@@ -1,8 +1,9 @@
+=================================
 Welcome to BioTK's documentation!
 =================================
 
 Overview
---------
+========
 
 BioTK is a Python toolkit, containing a library and scripts, for various
 bioinformatics tasks:
@@ -14,28 +15,24 @@ bioinformatics tasks:
 - Efficient storage and querying of sets of genomic intervals 
   (similar to BEDTools, GenomicRanges, etc.)
 
-Topics
-------
+Tutorial
+========
 
 .. toctree::
-   :maxdepth: 3
+    :maxdepth: 2
 
-   expression
-   meta-analysis
+    expression
+    meta-analysis
 
-Contributors
-------------
+Development information
+=======================
 
-- `Cory Giles <mailto:mail@corygil.es>`_
-- `Mikhail Dozmorov <mailto:dozmorovm@omrf.org>`_
+.. toctree::
+    :maxdepth: 3
 
-License
--------
+    dev
+    hacking
 
-BioTK is licensed under the `GNU Affero General Public License version 3
-<http://www.gnu.org/licenses/agpl-3.0.html>`_ (or any later version thereof,
-at your option).
- 
 Indices and tables
 ==================
 
