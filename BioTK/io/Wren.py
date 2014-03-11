@@ -9,28 +9,23 @@ from collections import defaultdict, namedtuple
 
 from BioTK.io import MDB 
 
-Term = namedtuple("Term", "id,name,synonyms")
-Synonym = namedtuple("Synonym", "text,case_sensitive")
-
 class SORD(object):
     def __init__(self, path):
        self._db = MDB.Database(path)
 
+    def _get_synonyms(self):
+        df = self._db["tblObjectSynonyms"].to_data_frame()
+        df = df.iloc[:,[0,1,3,2,4,8,11]]
+        df.columns = ["Term ID", "Name", "Synonym", "Category",
+                "Source ID", "Frequency", "Case Sensitive"]
+        df.index.name = "Synonym ID"
+        return df
+
     @property
-    def terms(self):
-        terms = {}
-        i = 0
-        for row in self._db["tblObjectSynonyms"].records():
-            id = row.RecordID
-            name = row.Objectname
-            synonym = row.Objectsynonym
-            case_sensitive = row.CAPS_flag
-            if not id in terms:
-                terms[id] = Term(id, name, [])
-            terms[id].synonyms.append(Synonym(synonym, case_sensitive))
+    def synonyms(self):
+        df = self._get_synonyms()
+        return df.drop("Name", axis=1)
 
-            #i += 1
-            #if i == 1000:
-            #    break
-
-        return terms
+    #@property
+    #def terms(self):
+    #    pass

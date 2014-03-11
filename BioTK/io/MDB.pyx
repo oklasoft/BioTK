@@ -236,6 +236,5 @@ cdef class Table(object):
         rows = []
         for row in self:
             rows.append(row)
-        names = self._column_names()
+        names = self.columns
         return pandas.DataFrame(rows, columns=names)
-

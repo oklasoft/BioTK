@@ -6,6 +6,7 @@ import gzip
 import json
 import sys
 import fileinput
+import itertools
 
 import networkx as nx
 import numpy as np
@@ -16,8 +17,9 @@ from BioTK.text.types import Token
 from BioTK.text import AhoCorasick
 
 class DependencyGraph(nx.DiGraph):
-    def __init__(self, words, tags, edges):
+    def __init__(self, words=[], tags=[], edges=[], entities=None):
         super(DependencyGraph, self).__init__()
+        self.entities = entities
         self.tokens = []
         for i,(w,t) in enumerate(zip(words, tags)):
             self.add_node(i, word=w, tag=t)
@@ -29,72 +31,121 @@ class DependencyGraph(nx.DiGraph):
         return "<DependencyGraph with %s nodes and %s edges>" \
                 % (len(self), len(self.edges()))
 
-    @staticmethod
-    def load(handle):
-        # FIXME: should this be a member of DG?
-        for line in handle:
-            document = json.loads(line)
-            for sentence in document:
-                yield DependencyGraph(sentence["words"], 
-                        sentence["tags"], sentence["edges"])
+    def to_dict(self):
+        words, tags, edges = [], [], []
+        for i in self.nodes():
+            if i == -1:
+                continue
+            n = self.node[i]
+            words.append(n["word"])
+            tags.append(n["tag"])
+        for dep, gov in self.edges():
+            type = self[dep][gov]["type"]
+            edges.append((gov,dep,type))
+        out = {"words": words, "tags": tags, "edges": edges}
+        if self.entities:
+            out["entities"] = self.entities
+        return out
+
+def find_entities_in_tokens(trie, tokens):
+    text = " ".join(tokens)
+    end = np.cumsum(list(map(len, tokens))) + np.arange(len(tokens))
+    start = np.array([0] + list(end[:-1]))
+    matches = collections.defaultdict(set)
+
+    for m in trie.search(text):
+        ix = tuple(((start < m.end) & (end > m.start)).nonzero()[0])
+        matches[m.key].add(ix)
+    for k in matches:
+        matches[k] = list(matches[k])
+    return dict(matches.items())
 
 class RelEx(object):
     """
     An implementation of Fundel et al 2007:
       RelEx - Relation extraction using dependency parse trees
     """
-    def __init__(self, trie):
-        self.iit_trie = AhoCorasick.Trie()
+    def __init__(self):
+        self.iit = {}
         with open(BioTK.data("text/RelEx-IITs")) as handle:
             for line in handle:
                 stem, words = line.split(":")
                 for word in words.split("|"):
-                    self.iit_trie.add(word, key=stem)
-        self.iit_trie.build()
+                    self.iit[word] = stem
 
-        self.entity_trie = trie
+    def _extract_one(self, ug, ix1, ix2):
+        assert(ix1 < ix2)
 
-    def extract(self, g):
-        tokens = [t.word for t in g.tokens]
-        text = " ".join(tokens)
-        end = np.cumsum(list(map(len, tokens))) + np.arange(len(tokens))
-        start = np.array([0] + list(end[:-1]))
-        matches = collections.defaultdict(set)
+        try:
+            path = nx.shortest_path(ug, ix1, ix2)
+        except nx.NetworkXNoPath:
+            return
 
-        for m in trie.search(text):
-            ix = tuple(((start < m.end) & (end > m.start)).nonzero()[0])
-            matches[m.key].add(ix)
+        if not len(path) >= 3:
+            return
+        if not ug[ix1][path[1]]["type"] == "nsubj":
+            return
+        if not ug[path[-2]][ix2]["type"] == "dobj":
+            return
 
-        for k1,ixs1 in matches.items():
+        for ix in path[1:-2]:
+            n = ug.node[ix]
+            if n["tag"].startswith("V"):
+                verb = n["word"]
+                if verb in self.iit:
+                    stem = self.iit[verb]
+                    return stem
+
+    def extract(self, g, entities):
+        ug = g.to_undirected()
+        relations = []
+
+        for k1,ixs1 in entities.items():
             ixs1 = [ix for ixs in ixs1 for ix in ixs]
-            for k2,ixs2 in matches.items():
+            for k2,ixs2 in entities.items():
                 if k1 >= k2:
                     continue
                 ixs2 = [ix for ixs in ixs2 for ix in ixs]
-                print(ixs1, ixs2)
-        return []
+                for ix1, ix2 in itertools.product(ixs1, ixs2):
+                    if ix1 == ix2:
+                        # Shouldn't happen ...
+                        continue
+                    reverse = ix1 > ix2
+                    if reverse:
+                        ix1, ix2 = ix2, ix1
+                    r = self._extract_one(ug, ix1, ix2)
+                    if r is not None:
+                        rel = (r,k2,k1) if reverse else (r,k1,k2)
+                        relations.append(rel)
+                        break
+        return relations
 
 from BioTK.io.cache import memcached
 from BioTK.io import Wren 
 from BioTK.text.lexicon import common_words
 
-def get_terms():
-    path = "/home/gilesc/Data/SORD29.mdb"
-    db = Wren.SORD(path)
-    return db.terms
+from collections import defaultdict
 
-if __name__ == "__main__":
+@memcached()
+def get_synonyms():
+    cw = common_words(50000)
+
+    path = "/home/gilesc/Data/SORD_Master_v31.mdb"
+    db = Wren.SORD(path)
+    df = db.synonyms
+    ix = (df["Synonym"].str.len() > 3) & \
+        [s not in cw for s in df["Synonym"]]
+    return df.ix[ix,:]
+
+if __name__ == "__main1__":
     trie = AhoCorasick.MixedCaseSensitivityTrie(boundary_characters=" ;,.!?")
 
-    cw = common_words(50000)
     import collections
-
-    terms = get_terms()
-    for t in terms.values():
-        for s in t.synonyms:
-            if (len(s.text) < 3) or (s.text.lower() in cw):
-                continue
-            trie.add(s.text, case_sensitive=s.case_sensitive, key=t.id)
+    #print("Retrieving synonyms ...")
+    synonyms = get_synonyms().ix[:,["Term ID", "Synonym", "Case Sensitive"]]
+    #print("Adding synonyms to trie ...")
+    for _, id, text, case_sensitive in synonyms.to_records():
+        trie.add(text, bool(case_sensitive), key=id)
 
     """
     terms = collections.defaultdict(list)
@@ -112,8 +163,8 @@ if __name__ == "__main__":
                     trie.add(synonym, key=gene_id)
     """
 
+    #print("Building trie ...")
     trie.build()
-    print("Trie built...")
 
     """
     c = collections.Counter()
@@ -132,9 +183,28 @@ if __name__ == "__main__":
         print(id, count, terms[id])
     """
 
+    #relex = RelEx(trie)
 
-    relex = RelEx()
     with fileinput.input() as handle:
-        for g in DependencyGraph.load(handle):
-            for rel in relex.extract(g):
+        for line in handle:
+            document = json.loads(line)
+            for sentence in document:
+                g = DependencyGraph(**sentence)
+                entities = find_entities_in_tokens(trie, sentence["words"])
+                if entities:
+                    g.entities = entities
+                    print(g.to_dict())
+
+if __name__ == "__main__":
+    rx = RelEx()
+
+    with fileinput.input() as handle:
+        for i,line in enumerate(handle):
+            if i % 1000 == 0:
+                print("**", i)
+            sentence = eval(line)
+            g = DependencyGraph(**sentence)
+            if len(g.entities) < 2:
+                continue
+            for rel in rx.extract(g, g.entities):
                 print(rel)
