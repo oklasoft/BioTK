@@ -1,6 +1,5 @@
 from cpython cimport bool
 
-# TODO: handle overlaps
 # TODO: possibly use a STL map and pointers 
 #   to get better performance for searches?
 
@@ -23,9 +22,9 @@ def longest_nonoverlapping_matches(matches):
 def restrict_by_boundary_characters(matches, str query, str bchars):
     out = []
     for m in matches:
-        if not (m.start == 0 or query[m.start - 1] in bchars):
+        if not ((m.start == 0) or (query[m.start - 1] in bchars)):
             continue
-        if not (m.end == len(query) or query[m.end + 1] in bchars):
+        if not ((m.end == len(query)) or (query[m.end] in bchars)):
             continue
         out.append(m)
     return out
@@ -44,7 +43,7 @@ cdef class Match:
         return self.end - self.start
 
     cdef bool overlaps(self, Match o):
-        return self.end >= o.start and self.start <= o.end
+        return self.end > o.start and self.start < o.end
 
 cdef class Node:
     cdef public:
@@ -154,10 +153,12 @@ cdef class Trie:
         return matches
 
 class MixedCaseSensitivityTrie(object):
-    def __init__(self, allow_overlaps=True):
+    def __init__(self, allow_overlaps=True, boundary_characters=""):
         self._cs = Trie(case_sensitive=True, 
+                boundary_characters=boundary_characters,
                 allow_overlaps=True)
         self._ci = Trie(case_sensitive=False, 
+                boundary_characters=boundary_characters,
                 allow_overlaps=True)
         self.allow_overlaps = allow_overlaps
 
