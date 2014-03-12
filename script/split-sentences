@@ -1,0 +1,15 @@
+#!/usr/bin/env python2
+
+# FIXME: use python3
+
+import fileinput
+
+import nltk.tokenize
+
+punkt = nltk.data.load("tokenizers/punkt/english.pickle")
+
+for line in fileinput.input():
+    for sentence in punkt.tokenize(line):
+        sentence = sentence.strip()
+        if sentence and len(sentence.split()) > 5:
+            print(sentence)
