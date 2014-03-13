@@ -11,6 +11,8 @@ import urllib.request
 
 import memcache
 
+import BioTK.config
+
 log = logging.getLogger(__name__)
 
 MEMCACHED_SLAB_SIZE = 1024 * 512
@@ -46,10 +48,8 @@ RAMCache = memcached
 
 # TODO: actually use cache_size (in MB) and make this FIFO 
 
-def download(url, cache_dir="/tmp/BioTK/downloads/", cache_size=100):
-    os.makedirs(cache_dir, exist_ok=True)
-
-    dest = os.path.join(cache_dir.encode("utf-8"), 
+def download(url):
+    dest = os.path.join(BioTK.config.CACHE_DIR.encode("utf-8"), 
             base64.b64encode(url.encode("utf-8")))
     
     if not os.path.exists(dest):

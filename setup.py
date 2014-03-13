@@ -50,7 +50,7 @@ cmdclass["test"] = Test
 # Find scripts and requirements
 
 scripts = [os.path.abspath("script/" + p) \
-           for p in os.listdir("script/") if os.path.isfile(p)]
+           for p in os.listdir("script/") if os.path.isfile(p) and p != ".gitignore"]
 
 requirements = [str(item.req) for item in 
         parse_requirements("requirements.txt")]
@@ -118,7 +118,8 @@ setup(
     license="AGPLv3+",
 
     # Modules, data, extensions, and scripts to be installed
-    packages=["BioTK"],
+    packages=["BioTK", "BioTK.io", "BioTK.io.GEO", 
+        "BioTK.genome", "BioTK.expression", "BioTK.text"],
     install_requires=requirements,
     tests_require=requirements + ["pytest"],
     extras_require={

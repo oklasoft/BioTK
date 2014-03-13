@@ -77,11 +77,11 @@ def _parse_as_data_frame(handle):
             relations.append((t.id, target, "is_a"))
 
     terms = pd.DataFrame.from_records(terms,
-            columns=["TermID", "Name", "Namespace"],
-            index="TermID")
+            columns=["Term ID", "Name", "Namespace"],
+            index="Term ID")
     synonyms = pd.DataFrame.from_records(synonyms,
-            columns=["TermID", "Synonym"],
-            index="TermID")
+            columns=["Term ID", "Synonym"],
+            index="Term ID")
     relations = pd.DataFrame.from_records(relations,
             columns=["Agent", "Target", "Relation"])
     return terms, synonyms, relations
