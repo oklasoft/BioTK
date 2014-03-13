@@ -1,6 +1,8 @@
 import logging
 import os
 
+from .math import *
+
 logging.basicConfig(level=logging.INFO)
 
 def data(relpath):
