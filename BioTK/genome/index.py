@@ -73,7 +73,7 @@ class RAMIndex(object):
 
     def add(self, chrom, start, end, data=None):
         """
-        Add another interval to the index. This method can only be
+        Add another region to the index. This method can only be
         called if the index has not been built yet.
         """
         if self._built:
@@ -96,10 +96,14 @@ class RAMIndex(object):
         Search the index for intervals overlapping the given 
         chrom, start, and end.
         """
+        start, end = sorted([start, end])
         if not self._built:
             raise Exception("Must call %s.build() before using search()" % \
                             str(type(self)))
-        return self._roots[chrom].search(start, end)
+        root = self._roots.get(chrom)
+        if root is None:
+            return []
+        return root.search(start, end)
     
     def __iter__(self):
         assert(self._built)
