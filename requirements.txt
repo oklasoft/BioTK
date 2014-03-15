@@ -12,3 +12,5 @@ python3-memcached
 pyparsing
 
 networkx
+
+scikit-learn
