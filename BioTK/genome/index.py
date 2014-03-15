@@ -30,7 +30,7 @@ class IntervalNode(object):
         if self._left:
             yield from self._left.search(start, end)
         if (start < self._end) and (end > self._start):
-            yield self._data
+            yield (self._start, self._end, self._data)
         if end < self._start:
             return
         if self._right:
@@ -55,7 +55,8 @@ class IntervalTree(object):
         self._root = IntervalNode(intervals)
         
     def search(self, start, end):
-        return self._root.search(start, end)
+        result = self._root.search(start, end)
+        return result if (result is not None) else []
         
     def __iter__(self):
         return iter(self._root)
@@ -103,7 +104,11 @@ class RAMIndex(object):
         root = self._roots.get(chrom)
         if root is None:
             return []
-        return root.search(start, end)
+
+        result = []
+        for (start, end, data) in root.search(start, end):
+            result.append((chrom, start, end, data))
+        return result
     
     def __iter__(self):
         assert(self._built)
