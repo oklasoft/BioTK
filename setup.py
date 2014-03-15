@@ -105,6 +105,7 @@ setup(
     name="BioTK",
     author="Cory Giles",
     author_email="mail@corygil.es",
+    version="0.0.1",
     description="Utilities for genome analysis, expression analysis, and text mining.",
     classifiers=[
         "Development Status :: 3 - Alpha",
