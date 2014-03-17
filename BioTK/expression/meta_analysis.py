@@ -203,19 +203,22 @@ class ExpressionDB(object):
             platform._add_samples(geo_platform, it)
         return platform
       
-def test():
-    db = ExpressionDB("/home/gilesc/expression.h5")
-    # errors on 341
-    #for accession in [1355, 5424, 5426, 85]:
-    for accession in [1355]:
-        accession = "GPL%s" % accession
-        path = "/home/gilesc/Data/GEO/rat/%s_family.soft.gz" % accession
-        print("* Inserting %s" % accession)
-        platform = db.add_family(path)
+def main(args):
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--db-path", "-d",
+            required=True)
+    parser.add_argument("soft_file", nargs="+")
+    args = parser.parse_args(args)
 
-    #ss = platform.samples.index[:5]
-    #X = platform.expression(ss)
-    #print(X.head().T.head().T)
+    db = ExpressionDB(args.db_path)
+    for path in args.soft_file:
+        try:
+            db.add_family(path)
+        except:
+            pass
 
 if __name__ == "__main__":
-    test2()
+    import sys
+
+    main(sys.argv[1:])
