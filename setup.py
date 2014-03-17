@@ -3,7 +3,7 @@ import os
 import pkgutil
 import subprocess
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 from distutils.extension import Extension
 from pip.req import parse_requirements
@@ -61,7 +61,9 @@ requirements = [str(item.req) for item in
 
 extensions = [
     Extension("BioTK.genome.region", 
-        ["BioTK/genome/region.pyx"]),
+        ["BioTK/genome/region.pxd", "BioTK/genome/region.pyx"]),
+    Extension("BioTK.genome.index", 
+        ["BioTK/genome/index.pyx"]),
     Extension("BioTK.text.types",
         ["BioTK/text/types.pyx"]),
     Extension("BioTK.text.AhoCorasick",
@@ -113,14 +115,15 @@ setup(
         "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
         "Natural Language :: English",
         "Operating System :: POSIX",
-        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.2",
+        "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ],
     license="AGPLv3+",
 
     # Modules, data, extensions, and scripts to be installed
-    packages=["BioTK", "BioTK.io", "BioTK.io.GEO", 
-        "BioTK.genome", "BioTK.expression", "BioTK.text"],
+    packages=find_packages(),
     install_requires=requirements,
     tests_require=requirements + ["pytest"],
     extras_require={
@@ -129,11 +132,10 @@ setup(
     },
     scripts=scripts,
     ext_modules=extensions,
-    #entry_points={
-    #    "console_scripts":
-    #    ["expression-db-add-family = \
-    #            BioTK.expression.meta_analysis:add_family"]
-    #}
+    entry_points={
+        "console_scripts":
+        ["edb = BioTK.expression.meta_analysis:main"]
+    },
 
     # setup.py entry points
     cmdclass=cmdclass

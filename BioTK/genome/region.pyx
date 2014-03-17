@@ -1,17 +1,5 @@
 import sys
 
-cdef:
-    enum Strand:
-        STRAND_UNKNOWN = 0
-        STRAND_FWD = 1
-        STRAND_REV = 2
-
-    class Interval:
-        cdef long start
-        cdef long end
-        cdef double score
-        cdef Strand strand
-
 cdef Strand parse_strand(str strand):
     if strand == "+":
         return STRAND_FWD
@@ -29,14 +17,6 @@ cdef str strand_to_string(Strand strand):
         return "."
 
 cdef class Region:
-    cdef readonly: 
-        str contig
-        long start, end
-        str name
-        double score
-    cdef:
-        Strand strand
-
     property strand:
         def __get__(self):
             return strand_to_string(self.strand)
@@ -61,3 +41,26 @@ cdef class Region:
     def __repr__(self):
         return "<Region %s:%s-%s (%s)>" % (self.contig, self.start, self.end, 
                 strand_to_string(self.strand))
+
+    def __richcmp__(Region self, Region o, int op):
+        if op == 0: # <
+            if self.contig < o.contig:
+                return True
+            elif (self.contig == o.contig):
+                if self.start < o.start:
+                    return True
+                elif (self.start == o.start):
+                    return self.end < o.end
+            return False
+        elif op == 2: # ==
+            return (self.contig == o.contig) and \
+                (self.start == o.start) and \
+                (self.end == o.end)
+        elif op == 4: # >
+            return o.__richcmp__(self, 0)
+        elif op == 1: # <=
+            return not self.__richcmp__(o, 4)
+        elif op == 3: # !=
+            return not self.__richcmp__(o, 2)
+        elif op == 5: # >=
+            return not self.__richcmp__(o, 0)
