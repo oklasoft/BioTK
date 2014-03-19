@@ -2,6 +2,7 @@ import sys
 import os
 import pkgutil
 import subprocess
+import numpy
 
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
@@ -124,6 +125,7 @@ setup(
     # Modules, data, extensions, and scripts to be installed
     packages=find_packages(),
     install_requires=requirements,
+    include_dirs=[numpy.get_include()],
     tests_require=requirements + ["pytest"],
     extras_require={
         "doc": requirements,
