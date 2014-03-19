@@ -9,7 +9,6 @@ from distutils.extension import Extension
 from pip.req import parse_requirements
 
 args = sys.argv[2:]
-sys.argv = sys.argv[:2]
 
 # Set up handlers for setup.py commands
 
