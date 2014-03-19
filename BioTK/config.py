@@ -12,4 +12,5 @@ CACHE_DIR = os.path.join(os.getenv("HOME"),
         ".cache", "BioTK")
 
 for dir in [CONFIG_DIR, CACHE_DIR]:
-    os.makedirs(dir, exist_ok=True)
+    if not os.path.isdir(dir):
+      os.makedirs(dir, exist_ok=True)
