@@ -99,6 +99,17 @@ except LibraryNotFound:
     print("WARNING: libmdb not found. Continuing without BioTK.io.MDB...",
         file=sys.stderr)
  
+###############################
+# Dynamically determine version
+###############################
+
+git_dir = os.path.join(os.path.dirname(__file__), ".git")
+if os.path.exists(git_dir):
+    VERSION = subprocess.check_output(["git", "describe", "--tags"]).strip()\
+            .decode("utf-8")
+else:
+    VERSION = "HEAD"
+
 #####################
 # Package description
 #####################
@@ -107,7 +118,7 @@ setup(
     name="BioTK",
     author="Cory Giles",
     author_email="mail@corygil.es",
-    version="0.0.1",
+    version=VERSION,
     description="Utilities for genome analysis, expression analysis, and text mining.",
     classifiers=[
         "Development Status :: 3 - Alpha",
