@@ -1,4 +1,3 @@
-# distutils: language = c++
 """
 Various types of indices for genomic regions, both RAM and disk-based.
 """

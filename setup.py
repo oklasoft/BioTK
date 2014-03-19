@@ -4,9 +4,8 @@ import pkgutil
 import subprocess
 import numpy
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, Extension
 from setuptools.command.test import test as TestCommand
-from distutils.extension import Extension
 from pip.req import parse_requirements
 
 args = sys.argv[2:]
@@ -60,14 +59,14 @@ requirements = [str(item.req) for item in
 ###################
 
 extensions = [
-    Extension("BioTK.genome.region", 
-        ["BioTK/genome/region.pxd", "BioTK/genome/region.pyx"]),
-    Extension("BioTK.genome.index", 
-        ["BioTK/genome/index.pyx"]),
+    Extension("BioTK.genome.region",
+        sources=["BioTK/genome/region.pxd", "BioTK/genome/region.pyx"]),
+    Extension("BioTK.genome.index",
+        sources=["BioTK/genome/index.pyx"]),
     Extension("BioTK.text.types",
-        ["BioTK/text/types.pyx"]),
+        sources=["BioTK/text/types.pyx"]),
     Extension("BioTK.text.AhoCorasick",
-        ["BioTK/text/AhoCorasick.pyx"])
+        sources=["BioTK/text/AhoCorasick.pyx"])
 ]
 
 class LibraryNotFound(Exception):
@@ -98,7 +97,7 @@ try:
 except LibraryNotFound:
     print("WARNING: libmdb not found. Continuing without BioTK.io.MDB...",
         file=sys.stderr)
- 
+
 ###############################
 # Dynamically determine version
 ###############################
@@ -107,6 +106,9 @@ git_dir = os.path.join(os.path.dirname(__file__), ".git")
 if os.path.exists(git_dir):
     VERSION = subprocess.check_output(["git", "describe", "--tags"]).strip()\
             .decode("utf-8")
+    version_py = os.path.join(os.path.dirname(__file__), "BioTK", "version.py")
+    with open(version_py, "w") as handle:
+        handle.write("""version = '%s'""" % VERSION)
 else:
     VERSION = "HEAD"
 

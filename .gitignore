@@ -11,3 +11,5 @@
 /build
 __pycache__
 /dist
+
+/BioTK/version.py
