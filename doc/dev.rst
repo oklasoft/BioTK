@@ -5,8 +5,9 @@ General development information
 Contributors
 ============
 
-- `Cory Giles <mailto:mail@corygil.es>`_
 - `Mikhail Dozmorov <mailto:dozmorovm@omrf.org>`_
+- `Cory Giles <mailto:mail@corygil.es>`_
+- `Stuart Glenn <mailto:Stuart-Glenn@omrf.org>`_
 
 License
 =======
