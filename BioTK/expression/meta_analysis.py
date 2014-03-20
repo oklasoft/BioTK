@@ -52,7 +52,8 @@ class Platform(object):
             # FIXME: handle probes mappings with '//'
             # FIXME: collapse by MAX mean
             X = X.groupby(F[collapse]).mean()
-            X = X.ix[[(" /// " not in x) for x in X.index],:]
+            if isinstance(X.index[0], str):
+                X = X.ix[[(" /// " not in x) for x in X.index],:]
         if normalize:
             X = quantile_normalize(X)
         return X
