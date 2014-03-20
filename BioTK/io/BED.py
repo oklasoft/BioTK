@@ -18,7 +18,9 @@ class BEDFile(object):
             attrs["start"] = int(attrs["start"])
             attrs["end"] = int(attrs["end"])
             if "score" in attrs:
-                attrs["score"] = float(attrs["score"])
+              if "." == attrs["score"]:
+                attrs["score"] = 0
+              attrs["score"] = float(attrs["score"])
             yield Region(**attrs)
 
     def __exit__(self, *args):
