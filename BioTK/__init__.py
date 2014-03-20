@@ -1,9 +1,14 @@
-import logging
 import os
 
 from .math import *
 
+import logging
 logging.basicConfig(level=logging.INFO)
+
+try:
+    from .version import version as __version__
+except ImportError:
+    __version__ = "HEAD"
 
 def data(relpath):
     """
