@@ -1,16 +1,20 @@
-import sys
 import os
 import pkgutil
+import shutil
 import subprocess
-import numpy
+import sys
 
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, find_packages, Extension, Command
 from setuptools.command.test import test as TestCommand
 from pip.req import parse_requirements
 
+import numpy
+
 args = sys.argv[2:]
 
-# Set up handlers for setup.py commands
+################################
+# setup.py commands/entry points
+################################
 
 cmdclass = {}
 
@@ -46,7 +50,38 @@ class Test(TestCommand):
 
 cmdclass["test"] = Test
 
+class Clean(Command):
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        base = os.path.abspath(os.path.dirname(__file__))
+        dirs = ["BioTK.egg-info", "build", "dist"]
+        exts = [".pyc",".so",".o",".pyo",".pyd",".c",".cpp"]
+
+        for dir in dirs:
+            path = os.path.join(base, dir)
+            if os.path.exists(path):
+                print("* recursively removing", path)
+                shutil.rmtree(path)
+
+        for root, dirs, files in os.walk(base):
+            for f in files:
+                if os.path.splitext(f)[-1] in exts:
+                    path = os.path.join(root, f)
+                    print("* removing", path)
+                    os.unlink(path)
+
+cmdclass["clean"] = Clean
+
+###############################
 # Find scripts and requirements
+###############################
 
 scripts = [os.path.abspath("script/" + p) \
            for p in os.listdir("script/") if os.path.isfile(p) and p != ".gitignore"]
@@ -148,7 +183,7 @@ setup(
     ext_modules=extensions,
     entry_points={
         "console_scripts":
-        ["edb = BioTK.expression.meta_analysis:main"]
+        ["expression-db = BioTK.expression.meta_analysis:main"]
     },
 
     # setup.py entry points
